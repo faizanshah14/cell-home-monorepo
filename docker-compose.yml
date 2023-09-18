@@ -1,0 +1,44 @@
+version: '3'
+
+services:
+  mysql-db:
+    container_name: mysql-db
+    image: mysql
+    ports:
+    - "3306:3306"
+    command: --default-authentication-plugin=mysql_native_password
+    environment:
+      MYSQL_ROOT_PASSWORD: root
+      MYSQL_DATABASE: cellHome 
+    volumes:
+      - mysql-data:/var/lib/mysql
+
+  cell-home-app:
+    container_name: cell-home-app
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    ports:
+      - "3000:3000"
+    environment:
+      DB_TYPE: mysql
+      DB_HOST:  mysql-db
+      DB_PORT: 3306
+      DB_USERNAME: root
+      DB_PASSWORD: root
+      DB_DATABASE: cellHome
+    depends_on:
+      - mysql-db
+    
+  react-frontend:
+    container_name: react-frontend
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+    ports:
+      - "80:80"
+    environment:
+        REACT_APP_API_URL: http://localhost:3000/api/ 
+
+volumes:
+  mysql-data:
